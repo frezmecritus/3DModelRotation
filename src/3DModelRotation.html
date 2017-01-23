@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>3DModelRotation</title>
+    <script src="../lib/webgl-utils.js"></script>
+    <script src="../lib/webgl-debug.js"></script>
+    <script src="../lib/cuon-utils.js"></script>
+    <script src="../lib/cuon-matrix-quat.js"></script>
+    <script src="../lib/materials_Ayerdi.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="Main.js"></script>
+  </head>
+
+  <body onload="main()">
+    <canvas id="webgl" width="600" height="600">
+    Please use a browser that supports "canvas"
+    </canvas>
+    <div id="lighting_panel">
+      <input type="text" id="lamp1_pos_x">
+      <input type="text" id="lamp1_pos_y">
+      <input type="text" id="lamp1_pos_z"><br />
+      <input type="text" id="lamp1_amb_r">
+      <input type="text" id="lamp1_amb_g">
+      <input type="text" id="lamp1_amb_b"><br />
+      <input type="text" id="lamp1_dif_r">
+      <input type="text" id="lamp1_dif_g">
+      <input type="text" id="lamp1_dif_b"><br />
+      <input type="text" id="lamp1_spc_r">
+      <input type="text" id="lamp1_spc_g">
+      <input type="text" id="lamp1_spc_b">
+    </div>
+  </body>
+</html>
