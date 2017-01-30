@@ -1,7 +1,3 @@
-//3456789_123456789_123456789_123456789_123456789_123456789_123456789_123456789_
-//
-// Designed for EECS 351, Northwestern University
-//
 // Vertex shader program
 var VSHADER_SOURCE =
   //-------------ATTRIBUTES: of each vertex, read from our Vertex Buffer Object
@@ -91,29 +87,6 @@ var FSHADER_SOURCE =
   '  vec3 speculr = (u_Lamp0Spec * e640 * e640 + u_Lamp1Spec * e641 * e641) * u_Ks;\n' +
   '  gl_FragColor = vec4(emissive + ambient + diffuse + speculr , 1.0);\n' +
   '}\n';
-
-// Global Variables
-var ANGLE_STEP = 45.0;
-
-var g_EyeX = 6, g_EyeY = -2, g_EyeZ = 3;
-var g_centerX = 0, g_centerY = 0, g_centerZ = 0;
-var g_upX = 0, g_upY = 0, g_upZ = 1;
-var g_near = 1, g_far = 50;
-var vpAspect = 3.0;
-
-var viewSet = {
-  eye:    {x: 6.8, y: 4.0, z: 0.5},
-  center: {x: 0.0, y: 0.0, z: 0.5},
-  up:     {x: 0.0, y: 0.0, z: 1.0},
-  rotate: {theta: 210.0, phi: 0.0, tilt: 0.0}
-};
-
-var lamp1Attr = {
-  pos: {x: 6.0, y:-2.0, z: 3.0, w: 1.0},
-  amb: {r: 0.1, g: 0.0, b: 0.2},
-  dif: {r: 0.0, g: 0.1, b: 0.2},
-  spc: {r: 0.1, g: 0.0, b: 0.2}
-};
 
 var floatsPerVertex = 3;
 
@@ -233,10 +206,10 @@ function main() {
     gl.uniform3f(u_Lamp0Spec, 1.0, 1.0, 1.0);   // Specular
 
     // Position the second light source in World coords:
-    gl.uniform4f(u_Lamp1Pos,  lamp1Attr.pos.x, lamp1Attr.pos.y, lamp1Attr.pos.z, lamp1Attr.pos.w);
-    gl.uniform3f(u_Lamp1Amb,  lamp1Attr.amb.r, lamp1Attr.amb.g, lamp1Attr.amb.b);
-    gl.uniform3f(u_Lamp1Diff, lamp1Attr.dif.r, lamp1Attr.dif.g, lamp1Attr.dif.b);
-    gl.uniform3f(u_Lamp1Spec, lamp1Attr.spc.r, lamp1Attr.spc.g, lamp1Attr.spc.b);
+    gl.uniform4f(u_Lamp1Pos,  g_lamp1Attr.pos.x, g_lamp1Attr.pos.y, g_lamp1Attr.pos.z, g_lamp1Attr.pos.w);
+    gl.uniform3f(u_Lamp1Amb,  g_lamp1Attr.amb.r, g_lamp1Attr.amb.g, g_lamp1Attr.amb.b);
+    gl.uniform3f(u_Lamp1Diff, g_lamp1Attr.dif.r, g_lamp1Attr.dif.g, g_lamp1Attr.dif.b);
+    gl.uniform3f(u_Lamp1Spec, g_lamp1Attr.spc.r, g_lamp1Attr.spc.g, g_lamp1Attr.spc.b);
 
     draw(gl, currentAngle, mvpMatrix, u_MvpMatrix,
                            modelMatrix, u_ModelMatrix,
@@ -253,90 +226,61 @@ function main() {
 // shapes.
 function initVertexBuffer(gl) {
 
-  // Make each 3D shape in its own array of vertices:
   makeSphere();
   makeHeliBody();
   makeBrick();
   makeCylinder();
   makeTorus();
-  // makeCone();
   makeGroundGrid();
 
   var vSiz = (sphVerts.length + hlcVerts.length + brkVerts.length + cylVerts.length +
               torVerts.length + gndVerts.length);
 
-  var vn = vSiz / floatsPerVertex;
-  console.log('vn is', vn, 'vSiz is', vSiz, 'floatsPerVertex is', floatsPerVertex);
-  var vertexArray = new Float32Array(vSiz);
+  console.log('Number of vertices is', vSiz / floatsPerVertex, ', point per vertex is', floatsPerVertex);
 
-  sphStart = 0;
-  for(i=0, j=0; j< sphVerts.length; i++, j++) {
-    vertexArray[i] = sphVerts[j];
-  }
-  hlcStart = i;
-  for(j=0; j< hlcVerts.length; i++, j++) {
-    vertexArray[i] = hlcVerts[j];
-  }
-  brkStart = i;
-  for(j=0; j< brkVerts.length; i++,j++) {
-    vertexArray[i] = brkVerts[j];
-  }
-  cylStart = i;
-  for(j=0; j< cylVerts.length; i++,j++) {
-    vertexArray[i] = cylVerts[j];
-  }
-  torStart = i;
-  for(j=0; j< torVerts.length; i++,j++) {
-    vertexArray[i] = torVerts[j];
-  }
-  gndStart = i;
-  for(j=0; j< gndVerts.length; i++, j++) {
-    vertexArray[i] = gndVerts[j];
-  }
+  var verticesArrayBuffer = new ArrayBufferFloat32Array(vSiz);
+  verticesArrayBuffer.appendObject(SPHERE, sphVerts);
+  verticesArrayBuffer.appendObject(HELICOPTERBODY, hlcVerts);
+  verticesArrayBuffer.appendObject(BRICK, brkVerts);
+  verticesArrayBuffer.appendObject(CYLINDER ,cylVerts);
+  verticesArrayBuffer.appendObject(TORUS, torVerts);
+  verticesArrayBuffer.appendObject(GROUNDGRID, gndVerts);
+  sphStart = verticesArrayBuffer.getObjectStartPosition(SPHERE);
+  hlcStart = verticesArrayBuffer.getObjectStartPosition(HELICOPTERBODY);
+  brkStart = verticesArrayBuffer.getObjectStartPosition(BRICK);
+  cylStart = verticesArrayBuffer.getObjectStartPosition(CYLINDER);
+  torStart = verticesArrayBuffer.getObjectStartPosition(TORUS);
+  gndStart = verticesArrayBuffer.getObjectStartPosition(GROUNDGRID);
 
   var nSiz = vSiz;
-  var normalArray = new Float32Array(nSiz);
-  for(i=0, j=0; j< sphNorms.length; i++, j++) {
-    normalArray[i] = sphNorms[j];
-  }
-  for(j=0; j< hlcNorms.length; i++, j++) {
-    normalArray[i] = hlcNorms[j];
-  }
-  for(j=0; j< brkNorms.length; i++,j++) {
-    normalArray[i] = brkNorms[j];
-  }
-  for(j=0; j< cylNorms.length; i++,j++) {
-    normalArray[i] = cylNorms[j];
-  }
-  for(j=0; j< torNorms.length; i++,j++) {
-    normalArray[i] = torNorms[j];
-  }
-  for(j=0; j< gndNorms.length; i++,j++) {
-    normalArray[i] = gndNorms[j];
-  }
+  var normalVectorsArrayBuffer = new ArrayBufferFloat32Array(nSiz);
+  normalVectorsArrayBuffer.appendObject(SPHERE, sphNorms);
+  normalVectorsArrayBuffer.appendObject(HELICOPTERBODY, hlcNorms);
+  normalVectorsArrayBuffer.appendObject(BRICK, brkNorms);
+  normalVectorsArrayBuffer.appendObject(CYLINDER ,cylNorms);
+  normalVectorsArrayBuffer.appendObject(TORUS, torNorms);
+  normalVectorsArrayBuffer.appendObject(GROUNDGRID, gndNorms);
 
   var iSiz = (sphIndex.length + hlcIndex.length + brkIndex.length);
   console.log('iSiz is', iSiz);
-  var indiceArray = new Uint8Array(iSiz);
 
-  sphIStart = 0;
-  for(i=0, j=0; j<sphIndex.length; i++, j++) {
-    indiceArray[i] = sphIndex[j];
-  }
-  hlcIStart = i;
-  var indexIncr = hlcStart/floatsPerVertex;
-  for(j=0; j<hlcIndex.length; i++, j++) {
-    indiceArray[i] = hlcIndex[j] + indexIncr;
-  }
-  brkIStart = i;
-  indexIncr = brkStart/floatsPerVertex;
-  for(j=0; j<brkIndex.length; i++,j++) {
-    indiceArray[i] = brkIndex[j] + indexIncr;
-  }
+  var verticesIndiceArrayBuffer = new ArrayBufferUint8Array(iSiz);
+  var hlcIndexIncr = hlcStart/floatsPerVertex;
+  var brkIndexIncr = brkStart/floatsPerVertex;
+  verticesIndiceArrayBuffer.appendObject(SPHERE, sphIndex);
+  verticesIndiceArrayBuffer.appendObject(HELICOPTERBODY, hlcIndex.map(function(idx){
+    return idx+hlcIndexIncr;
+  }));
+  verticesIndiceArrayBuffer.appendObject(BRICK, brkIndex.map(function(idx){
+    return idx+brkIndexIncr;
+  }));
+  sphIStart = verticesIndiceArrayBuffer.getObjectStartPosition(SPHERE);
+  hlcIStart = verticesIndiceArrayBuffer.getObjectStartPosition(HELICOPTERBODY);
+  brkIStart = verticesIndiceArrayBuffer.getObjectStartPosition(BRICK); 
 
   // We create two separate buffers so that you can modify normals if you wish.
-  if (!initArrayBuffer(gl, 'a_Position', vertexArray, gl.FLOAT, 3)) return -1;
-  if (!initArrayBuffer(gl, 'a_Normal', normalArray, gl.FLOAT, 3))  return -1;
+  if (!initArrayBuffer(gl, 'a_Position', verticesArrayBuffer.getArray(), gl.FLOAT, 3)) return -1;
+  if (!initArrayBuffer(gl, 'a_Normal', normalVectorsArrayBuffer.getArray(), gl.FLOAT, 3))  return -1;
 
   // Unbind the buffer object
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -348,9 +292,9 @@ function initVertexBuffer(gl) {
     return -1;
   }
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indiceArray, gl.STATIC_DRAW);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, verticesIndiceArrayBuffer.getArray(), gl.STATIC_DRAW);
 
-  return indiceArray.length;
+  return verticesIndiceArrayBuffer.getArray().length;
 }
 
 function initArrayBuffer(gl, attribute, data, type, num) {
@@ -395,7 +339,7 @@ function makeBrick() {
 //==============================================================================
 function makeCylinder() {
   var cylinder = new Cylinder();
-  cylVerts = cylinder.getVertices();
+  cylVert = cylinder.getVertices();
   cylNorms = cylinder.getNormalVectors();
 }
 
@@ -655,134 +599,4 @@ function animate(angle) {
 
   var newAngle = angle + (ANGLE_STEP * elapsed) / 1000.0;
   return newAngle %= 360;
-}
-
-
-//==============================================================================
-// web initialization
-$( function() {
-  $('#lighting_panel').hide();
-  lamb1update();
-  $( "input" )
-    .keyup(function() {
-      var value = $( this ).val();
-      var name  = $( this ).attr('id');
-
-      if(!isNaN(value)) {
-        arr = name.split("_");
-        //console.log( arr[0] + ' ' + arr[1] + ' ' + arr[2]);
-        lamp1Attr[ arr[1] ][ arr[2] ] = value;
-      }
-      lamb1update();
-    })
-    .keyup();
-  //alert("Press 'h' for input instruction");
-});
-
-function lamb1update() {
-  $('#lamp1_pos_x').val(lamp1Attr.pos.x);
-  $('#lamp1_pos_y').val(lamp1Attr.pos.y);
-  $('#lamp1_pos_z').val(lamp1Attr.pos.z);
-  $('#lamp1_amb_r').val(lamp1Attr.amb.r);
-  $('#lamp1_amb_g').val(lamp1Attr.amb.g);
-  $('#lamp1_amb_b').val(lamp1Attr.amb.b);
-  $('#lamp1_dif_r').val(lamp1Attr.dif.r);
-  $('#lamp1_dif_g').val(lamp1Attr.dif.g);
-  $('#lamp1_dif_b').val(lamp1Attr.dif.b);
-  $('#lamp1_spc_r').val(lamp1Attr.spc.r);
-  $('#lamp1_spc_g').val(lamp1Attr.spc.g);
-  $('#lamp1_spc_b').val(lamp1Attr.spc.b);
-}
-
-//===============================================================================
-// keyboard input event-listener callbacks
-function myKeyPress(ev) {
-
-  switch(ev.keyCode) {
-    // viewpoint changes
-    case 101:   // The e key was pressed
-      viewSet.eye.x += 0.1;
-      viewSet.center.x += 0.1;
-      break;
-    case 113:   // The q key was pressed
-      viewSet.eye.x -= 0.1;
-      viewSet.center.x -= 0.1;
-      break;
-    case 100:   // The d key was pressed
-      viewSet.eye.y += 0.1;
-      viewSet.center.y += 0.1;
-      break;
-    case 97:    // The a key was pressed
-      viewSet.eye.y -= 0.1;
-      viewSet.center.y -= 0.1;
-      break;
-    case 119:   // The w key was pressed
-      viewSet.eye.z += 0.1;
-      viewSet.center.z += 0.1;
-      break;
-    case 115:   // The s key was pressed
-      viewSet.eye.z -= 0.1;
-      viewSet.center.z -= 0.1;
-      break;
-
-    // perspective box size changes
-    case 99:    // The c key was pressed
-      viewSet.rotate.theta -= 1;
-      updateLookAt();
-      break;
-    case 122:   // The z key was pressed
-      viewSet.rotate.theta += 1;
-      updateLookAt();
-      break;
-    case 120:   // The x key was pressed
-      viewSet.center.z += 0.03;
-      //viewSet.rotate.tilt += 1;
-      //updateLookAt();
-      break;
-    case 88:    // The X key was pressed
-      viewSet.center.z -= 0.03;
-      //viewSet.rotate.tilt -= 1;
-      //updateLookAt();
-      break;
-    case 112:   // The p key was pressed
-      $('#lighting_panel').toggle();
-      break;
-    case 72:    // h, H for help
-    case 104:
-      alert("Hotkeys:\n\n"+
-            "Adjustable Camera:\n" +
-            "'e' 'q' 'd' 'a' 'w' 's' for position move\n" +
-            "'c' 'z' for horizontal rotation, 'x' 'X' for tilting\n\n" +
-            "Lighting Panel:\n" +
-            "'p' will show lighting control panel on the bottom of the page.");
-      break;
-    default:
-      console.log('press:' + ev.keyCode);
-      break;
-  }
-}
-
-function updateLookAt () {
-
-  var thetaD = viewSet.rotate.theta * Math.PI / 180;
-  //var phiD = viewSet.rotate.phi * Math.PI / 180;
-
-  // var newX = Math.cos(thetaD) * Math.cos(phiD);
-  // var newY = Math.sin(thetaD) * Math.cos(phiD);
-  // var newZ = Math.sin(phiD);
-
-  viewSet.center.x = viewSet.eye.x + 10 * Math.cos(thetaD);
-  viewSet.center.y = viewSet.eye.y + 10 * Math.sin(thetaD);
-}
-
-//==============================================================================
-// Called when user re-sizes their browser window , because our HTML file
-// contains:  <body onload="main()" onresize="winResize()">
-function winResize() {
-
-  var nuCanvas = document.getElementById('webgl');
-  var nuGL = getWebGLContext(nuCanvas);
-
-  nuCanvas.width = innerWidth;
-  nuCanvas.height = innerHeight;
 }

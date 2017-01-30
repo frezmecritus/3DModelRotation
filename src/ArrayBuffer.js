@@ -26,7 +26,14 @@ function ArrayBufferFloat32Array(length) {
     this.currentEnd = 0;
 }
 
+ArrayBufferUint8Array.prototype = Object.create(ArrayBufferPrototype.prototype);
+ArrayBufferUint8Array.prototype.constructor = ArrayBufferUint8Array;
+function ArrayBufferUint8Array(length) {
+    this.array = new Uint8Array(length);
+    this.objectsNameStartPositionMap = {};
+    this.currentEnd = 0;
+}
 
 if(typeof exports !== 'undefined') {
-    module.exports = {ArrayBufferFloat32Array};
+    module.exports = {ArrayBufferFloat32Array, ArrayBufferUint8Array};
 }
