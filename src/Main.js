@@ -377,337 +377,48 @@ function initArrayBuffer(gl, attribute, data, type, num) {
 }
 
 //==============================================================================
-// Make the body of helicopter.
 function makeHeliBody() {
-
-  hlcVerts = new Float32Array([
-    -0.4, 0.6,-0.6,   0.4, 0.6,-0.6,   0.4, 0.0,-0.6,  -0.4, 0.0,-0.6, // v0-v1-v2-v3 back
-    -0.4, 0.6,-0.6,  -0.4, 0.6, 0.1,   0.4, 0.6, 0.1,   0.4, 0.6,-0.6, // v0-v8-v7-v1 up
-     0.4,-0.3, 0.5,   0.4, 0.0, 0.6,  -0.4, 0.0, 0.6,  -0.4,-0.3, 0.5, // v4-v6-v9-v5 front
-     0.4, 0.0, 0.6,   0.4, 0.6, 0.1,  -0.4, 0.6, 0.1,  -0.4, 0.0, 0.6, // v6-v7-v8-v9 front-top
-     0.4, 0.0,-0.6,   0.4,-0.3, 0.5,  -0.4,-0.3, 0.5,  -0.4, 0.0,-0.6, // v2-v4-v5-v3 down
-     0.4, 0.6,-0.6,   0.4, 0.6, 0.1,   0.4, 0.0, 0.6,   0.4,-0.3, 0.5,   0.4, 0.0,-0.6, // v1-v7-v6-v4-v2 right
-    -0.4, 0.6,-0.6,  -0.4, 0.0,-0.6,  -0.4,-0.3, 0.5,  -0.4, 0.0, 0.6,  -0.4, 0.6, 0.1, // v0-v3-v5-v9-v8 left
-  ]);
-
-  // Normal
-  hlcNorms = new Float32Array([
-    0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0,  // v0-v1-v2-v3 back
-    0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,  // v0-v8-v7-v1 up
-    0.0,-1.0, 3.0,   0.0,-1.0, 3.0,   0.0,-1.0, 3.0,   0.0,-1.0, 3.0,  // front
-    0.0, 5.0, 6.0,   0.0, 5.0, 6.0,   0.0, 5.0, 6.0,   0.0, 5.0, 6.0,  // front-top
-    0.0,-1.1, 0.3,   0.0,-1.1, 0.3,   0.0,-1.1, 0.3,   0.0,-1.1, 0.3,  // down
-    1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,  1.0, 0.0, 0.0, // v1-v7-v6-v4-v2 right
-   -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, // v0-v3-v5-v9-v8 left
-  ]);
-
-  hlcIndex = new Uint8Array([
-    0, 1, 2,   0, 2, 3,               // back
-    4, 5, 6,   4, 6, 7,               // top
-    8, 9,10,   8,10,11,               // front
-   12,13,14,  12,14,15,               // front-top
-   16,17,18,  16,18,19,               // bottom
-   20,21,22,  20,22,23,  20,23,24,    // right
-   25,26,27,  25,27,28,  25,28,29,    // left
-  ]);
+    var helicopterBody = new HelicopterBody();
+    hlcVerts = helicopterBody.getVertices();
+    hlcNorms = helicopterBody.getNormalVectors();
+    hlcIndex = helicopterBody.getVerticesIndices();
 }
 
 //==============================================================================
-// Make a brick from , aligned with Z axis.
 function makeBrick() {
-
-  brkVerts = new Float32Array([
-     1.0, 1.0, 1.0,  -1.0, 1.0, 1.0,  -1.0,-1.0, 1.0,   1.0,-1.0, 1.0, // v0-v1-v2-v3 front
-     1.0, 1.0, 1.0,   1.0,-1.0, 1.0,   1.0,-1.0,-1.0,   1.0, 1.0,-1.0, // v0-v3-v4-v5 right
-     1.0, 1.0, 1.0,   1.0, 1.0,-1.0,  -1.0, 1.0,-1.0,  -1.0, 1.0, 1.0, // v0-v5-v6-v1 up
-    -1.0, 1.0, 1.0,  -1.0, 1.0,-1.0,  -1.0,-1.0,-1.0,  -1.0,-1.0, 1.0, // v1-v6-v7-v2 left
-    -1.0,-1.0,-1.0,   1.0,-1.0,-1.0,   1.0,-1.0, 1.0,  -1.0,-1.0, 1.0, // v7-v4-v3-v2 down
-     1.0,-1.0,-1.0,  -1.0,-1.0,-1.0,  -1.0, 1.0,-1.0,   1.0, 1.0,-1.0  // v4-v7-v6-v5 back
-  ]);
-
-  // Normal
-  brkNorms = new Float32Array([
-    0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,  // v0-v1-v2-v3 front
-    1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,  // v0-v3-v4-v5 right
-    0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,  // v0-v5-v6-v1 up
-   -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  // v1-v6-v7-v2 left
-    0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,  // v7-v4-v3-v2 down
-    0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0   // v4-v7-v6-v5 back
-  ]);
-
-  // Indices of the vertices
-  brkIndex = new Uint8Array([
-     0, 1, 2,   0, 2, 3,    // front
-     4, 5, 6,   4, 6, 7,    // right
-     8, 9,10,   8,10,11,    // up
-    12,13,14,  12,14,15,    // left
-    16,17,18,  16,18,19,    // down
-    20,21,22,  20,22,23     // back
- ]);
+    var brick = new Brick();
+    brkVerts = brick.getVertices();
+    brkNorms = brick.getNormalVectors();
+    brkIndex = brick.getVerticesIndices();
 }
 
 //==============================================================================
-// Make a cylinder shape from one TRIANGLE_STRIP drawing primitive, using the
-// 'stepped spiral' design described in notes.
-// Cylinder center at origin, encircles z axis, radius 1, top/bottom at z= +/-1.
 function makeCylinder() {
-
-  var capVerts = 32;    // # of vertices around the topmost 'cap' of the shape
-  var botRadius = 1.0;  // radius of bottom of cylinder (top always 1.0)
-
-  cylVerts = new Float32Array(((capVerts*6) -2) * floatsPerVertex);
-  cylNorms = new Float32Array(((capVerts*6) -2) * floatsPerVertex);
-
-  // Create circle-shaped top cap of cylinder at z=+1.0, radius 1.0
-  // v counts vertices: j counts array elements (vertices * elements per vertex)
-  for(v=1,j=0; v<2*capVerts; v++,j+=floatsPerVertex) {
-    // skip the first vertex--not needed.
-    if(v%2==0)
-    {       // put even# vertices at center of cylinder's top cap:
-      cylVerts[j  ] = 0.0;      // x,y,z,w == 0,0,1,1
-      cylVerts[j+1] = 0.0;
-      cylVerts[j+2] = 1.0;
-    }
-    else {  // put odd# vertices around the top cap's outer edge;
-            // x,y,z,w == cos(theta),sin(theta), 1.0, 1.0
-            //          theta = 2*PI*((v-1)/2)/capVerts = PI*(v-1)/capVerts
-      cylVerts[j  ] = Math.cos(Math.PI*(v-1)/capVerts);     // x
-      cylVerts[j+1] = Math.sin(Math.PI*(v-1)/capVerts);     // y
-      //  (Why not 2*PI? because 0 < =v < 2*capVerts, so we
-      //   can simplify cos(2*PI * (v-1)/(2*capVerts))
-      cylVerts[j+2] = 1.0;  // z
-    }
-    // Assign norm (0, 0, 1)
-    cylNorms[j  ] = 0.0;
-    cylNorms[j+1] = 0.0;
-    cylNorms[j+2] = 1.0;
-  }
-  // Create the cylinder side walls, made of 2*capVerts vertices.
-  // v counts vertices within the wall; j continues to count array elements
-  for(v=0; v< 2*capVerts; v++, j+=floatsPerVertex) {
-    if(v%2==0)  // position all even# vertices along top cap:
-    {
-        cylVerts[j  ] = Math.cos(Math.PI*(v)/capVerts);   // x
-        cylVerts[j+1] = Math.sin(Math.PI*(v)/capVerts);   // y
-        cylVerts[j+2] = 1.0;  // z
-
-        // Assign norm (cos, sin, 0)
-        cylNorms[j  ] = Math.cos(Math.PI*(v)/capVerts);
-        cylNorms[j+1] = Math.sin(Math.PI*(v)/capVerts);
-        cylNorms[j+2] = 0.0;
-    }
-    else    // position all odd# vertices along the bottom cap:
-    {
-        cylVerts[j  ] = botRadius * Math.cos(Math.PI*(v-1)/capVerts);   // x
-        cylVerts[j+1] = botRadius * Math.sin(Math.PI*(v-1)/capVerts);   // y
-        cylVerts[j+2] =-1.0;  // z
-
-        // Assign norm (cos, sin, 0)
-        cylNorms[j  ] = Math.cos(Math.PI*(v-1)/capVerts);
-        cylNorms[j+1] = Math.sin(Math.PI*(v-1)/capVerts);
-        cylNorms[j+2] = 0.0;
-    }
-  }
-  // Create the cylinder bottom cap, made of 2*capVerts -1 vertices.
-  // v counts the vertices in the cap; j continues to count array elements
-  for(v=0; v < (2*capVerts -1); v++, j+= floatsPerVertex) {
-    if(v%2==0) {  // position even #'d vertices around bot cap's outer edge
-      cylVerts[j  ] = botRadius * Math.cos(Math.PI*(v)/capVerts);   // x
-      cylVerts[j+1] = botRadius * Math.sin(Math.PI*(v)/capVerts);   // y
-      cylVerts[j+2] = -1.0;  // z
-    }
-    else {        // position odd#'d vertices at center of the bottom cap:
-      cylVerts[j  ] =  0.0;      // x,y,z,w == 0,0,-1,1
-      cylVerts[j+1] =  0.0;
-      cylVerts[j+2] = -1.0;
-    }
-
-    // Assign norm (0, 0, -1)
-    cylNorms[j  ] =  0.0;
-    cylNorms[j+1] =  0.0;
-    cylNorms[j+2] = -1.0;
-  }
+  var cylinder = new Cylinder();
+  cylVerts = cylinder.getVertices();
+  cylNorms = cylinder.getNormalVectors();
 }
 
 //==============================================================================
-// Make a sphere from one OpenGL TRIANGLE_STRIP primitive.
 function makeSphere () {
-  var SPHERE_DIV = 13;
-
-  var i, ai, si, ci;
-  var j, aj, sj, cj;
-  var p1, p2;
-
-  var positions = [];
-  var indices = [];
-
-  // Generate coordinates
-  for (j = 0; j <= SPHERE_DIV; j++) {
-    aj = j * Math.PI / SPHERE_DIV;
-    sj = Math.sin(aj);
-    cj = Math.cos(aj);
-    for (i = 0; i <= SPHERE_DIV; i++) {
-      ai = i * 2 * Math.PI / SPHERE_DIV;
-      si = Math.sin(ai);
-      ci = Math.cos(ai);
-
-      positions.push(si * sj);  // X
-      positions.push(cj);       // Y
-      positions.push(ci * sj);  // Z
-    }
-  }
-
-  // Generate indices
-  for (j = 0; j < SPHERE_DIV; j++) {
-    for (i = 0; i < SPHERE_DIV; i++) {
-      p1 = j * (SPHERE_DIV+1) + i;
-      p2 = p1 + (SPHERE_DIV+1);
-
-      indices.push(p1);
-      indices.push(p2);
-      indices.push(p1 + 1);
-
-      indices.push(p1 + 1);
-      indices.push(p2);
-      indices.push(p2 + 1);
-    }
-  }
-
-  sphVerts = new Float32Array(positions);
-  sphNorms = new Float32Array(positions);
-  sphIndex = new Uint8Array(indices);
+  var sphere = new Sphere();
+  sphVerts = sphere.getVertices();
+  sphNorms = sphere.getNormalVectors();
+  sphIndex = sphere.getVerticesIndices();
 }
 
 //==============================================================================
-//    Create a torus centered at the origin that circles the z axis.
 function makeTorus() {
-  var rbend = 1.0;    // Radius of circle formed by torus' bent bar
-  var rbar = 0.5;     // radius of the bar we bent to form torus
-  var barSlices = 23; // # of bar-segments in the torus: >=3 req'd;
-                      // more segments for more-circular torus
-  var barSides = 13;  // # of sides of the bar (and thus the
-                      // number of vertices in its cross-section)
-                      // >=3 req'd;
-                      // more sides for more-circular cross-section
-
-  torVerts = new Float32Array(floatsPerVertex*(2*barSides*barSlices +2));
-  torNorms = new Float32Array(floatsPerVertex*(2*barSides*barSlices +2));
-
-
-  var phi=0, theta=0;                   // begin torus at angles 0,0
-  var thetaStep = 2*Math.PI/barSlices;  // theta angle between each bar segment
-  var phiHalfStep = Math.PI/barSides;   // half-phi angle between each side of bar
-                                        // (WHY HALF? 2 vertices per step in phi)
-  // s counts slices of the bar; v counts vertices within one slice; j counts
-  // array elements (Float32) (vertices*#attribs/vertex) put in torVerts array.
-  for(s=0,j=0; s<barSlices; s++) {    // for each 'slice' or 'ring' of the torus:
-    for(v=0; v< 2*barSides; v++, j+=floatsPerVertex) {    // for each vertex in this slice:
-      if(v%2==0)  { // even #'d vertices at bottom of slice,
-        torVerts[j  ] = (rbend + rbar*Math.cos((v)*phiHalfStep)) *
-                                             Math.cos((s)*thetaStep);
-                //  x = (rbend + rbar*cos(phi)) * cos(theta)
-        torVerts[j+1] = (rbend + rbar*Math.cos((v)*phiHalfStep)) *
-                                             Math.sin((s)*thetaStep);
-                //  y = (rbend + rbar*cos(phi)) * sin(theta)
-        torVerts[j+2] = -rbar*Math.sin((v)*phiHalfStep);
-                //  z = -rbar  *   sin(phi)
-
-        //N_torus = (cos(phi)*cos(theta),  cos(phi)*sin(theta), -sin(phi)
-        torNorms[j  ] = Math.cos((v)*phiHalfStep) * Math.cos((s)*thetaStep);
-        torNorms[j+1] = Math.cos((v)*phiHalfStep) * Math.sin((s)*thetaStep);
-        torNorms[j+2] = Math.sin((v)*phiHalfStep);
-      }
-      else {        // odd #'d vertices at top of slice (s+1);
-                    // at same phi used at bottom of slice (v-1)
-        torVerts[j  ] = (rbend + rbar*Math.cos((v-1)*phiHalfStep)) *
-                                             Math.cos((s+1)*thetaStep);
-                //  x = (rbend + rbar*cos(phi)) * cos(theta)
-        torVerts[j+1] = (rbend + rbar*Math.cos((v-1)*phiHalfStep)) *
-                                             Math.sin((s+1)*thetaStep);
-                //  y = (rbend + rbar*cos(phi)) * sin(theta)
-        torVerts[j+2] = -rbar*Math.sin((v-1)*phiHalfStep);
-                //  z = -rbar  *   sin(phi)
-
-        torNorms[j  ] = Math.cos((v-1)*phiHalfStep) * Math.cos((s+1)*thetaStep);
-        torNorms[j+1] = Math.cos((v-1)*phiHalfStep) * Math.sin((s+1)*thetaStep);
-        torNorms[j+2] = Math.sin((v-1)*phiHalfStep);
-      }
-    }
-  }
-
-  // Repeat the 1st 2 vertices of the triangle strip to complete the torus:
-  torVerts[j  ] = rbend + rbar; // copy vertex zero;
-          //  x = (rbend + rbar*cos(phi==0)) * cos(theta==0)
-  torVerts[j+1] = 0.0;
-          //  y = (rbend + rbar*cos(phi==0)) * sin(theta==0)
-  torVerts[j+2] = 0.0;
-          //  z = -rbar  *   sin(phi==0)
-  torNorms[j  ] = 1.0;
-  torNorms[j+1] = 0.0;
-  torNorms[j+2] = 0.0;
-
-  j+=floatsPerVertex; // go to next vertex:
-  torVerts[j  ] = (rbend + rbar) * Math.cos(thetaStep);
-          //  x = (rbend + rbar*cos(phi==0)) * cos(theta==thetaStep)
-  torVerts[j+1] = (rbend + rbar) * Math.sin(thetaStep);
-          //  y = (rbend + rbar*cos(phi==0)) * sin(theta==thetaStep)
-  torVerts[j+2] = 0.0;
-          //  z = -rbar  *   sin(phi==0)
-  torNorms[j  ] = Math.cos(thetaStep);
-  torNorms[j+1] = Math.sin(thetaStep);
-  torNorms[j+2] = 0.0;
+  var torus = new Torus();
+  torVerts = torus.getVertices();
+  torNorms = torus.getNormalVectors();
 }
 
 //==============================================================================
-// Create a list of vertices that create a large grid of lines in the x,y plane
-// centered at x=y=z=0.  Draw this shape using the GL_LINES primitive.
 function makeGroundGrid() {
-
-  var xcount = 100;     // # of lines to draw in x,y to make the grid.
-  var ycount = 100;
-  var xymax = 50.0;     // grid size; extends to cover +/-xymax in x and y.\
-
-  // Create an (global) array to hold this ground-plane's vertices:
-  gndVerts = new Float32Array(floatsPerVertex*2*(xcount+ycount));
-            // draw a grid made of xcount+ycount lines; 2 vertices per line.
-
-  var xgap = xymax/(xcount-1);    // HALF-spacing between lines in x,y;
-  var ygap = xymax/(ycount-1);    // (why half? because v==(0line number/2))
-
-  // First, step thru x values as we make vertical lines of constant-x:
-  for(v=0, j=0; v<2*xcount; v++, j+= floatsPerVertex) {
-    if(v%2==0) {  // put even-numbered vertices at (xnow, -xymax, 0)
-      gndVerts[j  ] = -xymax + (v  )*xgap;  // x
-      gndVerts[j+1] = -xymax;               // y
-      gndVerts[j+2] = 0.0;                  // z
-    }
-    else {        // put odd-numbered vertices at (xnow, +xymax, 0).
-      gndVerts[j  ] = -xymax + (v-1)*xgap;  // x
-      gndVerts[j+1] = xymax;                // y
-      gndVerts[j+2] = 0.0;                  // z
-    }
-  }
-  // Second, step thru y values as wqe make horizontal lines of constant-y:
-  // (don't re-initialize j--we're adding more vertices to the array)
-  for(v=0; v<2*ycount; v++, j+= floatsPerVertex) {
-    if(v%2==0) {    // put even-numbered vertices at (-xymax, ynow, 0)
-      gndVerts[j  ] = -xymax;               // x
-      gndVerts[j+1] = -xymax + (v  )*ygap;  // y
-      gndVerts[j+2] = 0.0;                  // z
-    }
-    else {          // put odd-numbered vertices at (+xymax, ynow, 0).
-      gndVerts[j  ] = xymax;                // x
-      gndVerts[j+1] = -xymax + (v-1)*ygap;  // y
-      gndVerts[j+2] = 0.0;                  // z
-    }
-  }
-  // Set norm of gnd (0, 0, 1)
-  gndNorms = new Float32Array(gndVerts.length);
-  for(i=0; i<gndVerts.length; i+=floatsPerVertex) {
-    gndNorms[i  ] = 0;
-    gndNorms[i+1] = 0;
-    gndNorms[i+2] = 1;
-  }
+  var groundGrid = new GroundGrid();
+  gndVerts = groundGrid.getVertices();
+  gndNorms = groundGrid.getNormalVectors();
 }
 
 //==============================================================================

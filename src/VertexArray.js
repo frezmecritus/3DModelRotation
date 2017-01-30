@@ -1,4 +1,4 @@
-var VertexArray = function(length){
+function VertexArray(length) {
   array = new Float32Array(length);
   objectsNameStartPositionMap = {};
   currentEnd = 0;

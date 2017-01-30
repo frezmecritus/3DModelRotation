@@ -1,6 +1,7 @@
 var chai = require('chai');
 var assert = chai.assert;
-var VertexArray = require("../src/VertexArray");
+var VertexArray = require("../src/VertexArray.js");
+var BasicShape = require("../src/BasicShape.js");
 
 var brickVertices = new Float32Array([
    1.0, 1.0, 1.0,  -1.0, 1.0, 1.0,  -1.0,-1.0, 1.0,   1.0,-1.0, 1.0, // v0-v1-v2-v3 front
