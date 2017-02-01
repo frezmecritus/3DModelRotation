@@ -144,81 +144,55 @@ function Cylinder() {
     var capVerts = 32;    // # of vertices around the topmost 'cap' of the shape
     var botRadius = 1.0;  // radius of bottom of cylinder (top always 1.0)
 
-    cylVerts = new Float32Array(((capVerts*6) -2) * floatsPerVertex);
-    cylNorms = new Float32Array(((capVerts*6) -2) * floatsPerVertex);
+    var cylVerts = [];
+    var cylNorms = [];
 
     // Create circle-shaped top cap of cylinder at z=+1.0, radius 1.0
     // v counts vertices: j counts array elements (vertices * elements per vertex)
-    for(v=1,j=0; v<=2*capVerts; v++,j+=floatsPerVertex) {
+    for(var v=1; v<=2*capVerts+1; v++) {
         // skip the first vertex--not needed.
-        if(v%2==0)
-        {       // put even# vertices at center of cylinder's top cap:
-        cylVerts[j  ] = 0.0;      // x,y,z,w == 0,0,1,1
-        cylVerts[j+1] = 0.0;
-        cylVerts[j+2] = 1.0;
+        if(v%2==0) {       
+            // position even# vertices at center of cylinder's top cap:
+            cylVerts.push(0.0, 0.0, 1.0);
+        } else {  
+            // position odd# vertices around the top cap's outer edge;
+            // theta = 2*PI*(v-1)/(2*capVerts) = PI*(v-1)/capVerts
+            var theta = Math.PI*(v-1)/capVerts;
+            cylVerts.push(Math.cos(theta), Math.sin(theta), 1.0);
         }
-        else {  // put odd# vertices around the top cap's outer edge;
-                // x,y,z,w == cos(theta),sin(theta), 1.0, 1.0
-                //          theta = 2*PI*((v-1)/2)/capVerts = PI*(v-1)/capVerts
-        cylVerts[j  ] = Math.cos(Math.PI*(v-1)/capVerts);     // x
-        cylVerts[j+1] = Math.sin(Math.PI*(v-1)/capVerts);     // y
-        //  (Why not 2*PI? because 0 < =v < 2*capVerts, so we
-        //   can simplify cos(2*PI * (v-1)/(2*capVerts))
-        cylVerts[j+2] = 1.0;  // z
-        }
-        // Assign norm (0, 0, 1)
-        cylNorms[j  ] = 0.0;
-        cylNorms[j+1] = 0.0;
-        cylNorms[j+2] = 1.0;
+        cylNorms.push(0.0, 0.0, 1.0);
     }
     // Create the cylinder side walls, made of 2*capVerts vertices.
     // v counts vertices within the wall; j continues to count array elements
-    for(v=0; v<=2*capVerts+1; v++, j+=floatsPerVertex) {
-        if(v%2==0)  // position all even# vertices along top cap:
-        {
-            cylVerts[j  ] = Math.cos(Math.PI*(v)/capVerts);   // x
-            cylVerts[j+1] = Math.sin(Math.PI*(v)/capVerts);   // y
-            cylVerts[j+2] = 1.0;  // z
-
-            // Assign norm (cos, sin, 0)
-            cylNorms[j  ] = Math.cos(Math.PI*(v)/capVerts);
-            cylNorms[j+1] = Math.sin(Math.PI*(v)/capVerts);
-            cylNorms[j+2] = 0.0;
-        }
-        else    // position all odd# vertices along the bottom cap:
-        {
-            cylVerts[j  ] = botRadius * Math.cos(Math.PI*(v-1)/capVerts);   // x
-            cylVerts[j+1] = botRadius * Math.sin(Math.PI*(v-1)/capVerts);   // y
-            cylVerts[j+2] =-1.0;  // z
-
-            // Assign norm (cos, sin, 0)
-            cylNorms[j  ] = Math.cos(Math.PI*(v-1)/capVerts);
-            cylNorms[j+1] = Math.sin(Math.PI*(v-1)/capVerts);
-            cylNorms[j+2] = 0.0;
+    for(var v=0; v<=2*capVerts+1; v++) {
+        if(v%2==0) { 
+            // position all even# vertices along top cap:
+            var theta = Math.PI*(v)/capVerts;
+            cylVerts.push(Math.cos(theta), Math.sin(theta), 1.0);
+            cylNorms.push(Math.cos(theta), Math.sin(theta), 0.0);
+        } else {   
+            // position all odd# vertices along the bottom cap:
+            var theta = Math.PI*(v-1)/capVerts;
+            cylVerts.push(botRadius*Math.cos(theta), botRadius*Math.sin(theta), -1.0);
+            cylNorms.push(Math.cos(theta), Math.sin(theta), 0.0);
         }
     }
     // Create the cylinder bottom cap, made of 2*capVerts -1 vertices.
     // v counts the vertices in the cap; j continues to count array elements
-    for(v=0; v <(2*capVerts -1); v++, j+= floatsPerVertex) {
-        if(v%2==0) {  // position even #'d vertices around bot cap's outer edge
-        cylVerts[j  ] = botRadius * Math.cos(Math.PI*(v)/capVerts);   // x
-        cylVerts[j+1] = botRadius * Math.sin(Math.PI*(v)/capVerts);   // y
-        cylVerts[j+2] = -1.0;  // z
+    for(var v=0; v<=2*capVerts; v++) {
+        if(v%2==0) {  
+            // position even# vertices around bot cap's outer edge
+            var theta = Math.PI*(v)/capVerts;
+            cylVerts.push(botRadius*Math.cos(theta), botRadius*Math.sin(theta), -1.0);
+        } else {        
+            // position odd# vertices at center of the bottom cap:
+            cylVerts.push(0.0, 0.0, -1.0);
         }
-        else {        // position odd#'d vertices at center of the bottom cap:
-        cylVerts[j  ] =  0.0;      // x,y,z,w == 0,0,-1,1
-        cylVerts[j+1] =  0.0;
-        cylVerts[j+2] = -1.0;
-        }
-
-        // Assign norm (0, 0, -1)
-        cylNorms[j  ] =  0.0;
-        cylNorms[j+1] =  0.0;
-        cylNorms[j+2] = -1.0;
+        cylNorms.push(0.0, 0.0, -1.0);
     }
 
-    this.vertices = cylVerts;
-    this.normalVectors = cylNorms;
+    this.vertices = new Float32Array(cylVerts);
+    this.normalVectors = new Float32Array(cylNorms);
 }
 Cylinder.prototype.getVerticesIndices = function(){};
 
@@ -236,7 +210,6 @@ function Torus() {
                         // number of vertices in its cross-section)
                         // >=3 req'd;
                         // more sides for more-circular cross-section
-
     var torVerts = new Float32Array(floatsPerVertex*(2*barSides*barSlices +2));
     var torNorms = new Float32Array(floatsPerVertex*(2*barSides*barSlices +2));
 
@@ -321,7 +294,7 @@ function GroundGrid() {
     var xymax = 50.0;     // grid size; extends to cover +/-xymax in x and y.\
 
     // Create an (global) array to hold this ground-plane's vertices:
-    gndVerts = new Float32Array(floatsPerVertex*2*(xcount+ycount));
+    var gndVerts = new Float32Array(floatsPerVertex*2*(xcount+ycount));
                 // draw a grid made of xcount+ycount lines; 2 vertices per line.
 
     var xgap = xymax/(xcount-1);    // HALF-spacing between lines in x,y;
@@ -355,7 +328,7 @@ function GroundGrid() {
         }
     }
     // Set norm of gnd (0, 0, 1)
-    gndNorms = new Float32Array(gndVerts.length);
+    var gndNorms = new Float32Array(gndVerts.length);
     for(i=0; i<gndVerts.length; i+=floatsPerVertex) {
         gndNorms[i  ] = 0;
         gndNorms[i+1] = 0;

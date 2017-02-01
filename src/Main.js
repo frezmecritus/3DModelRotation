@@ -339,7 +339,7 @@ function makeBrick() {
 //==============================================================================
 function makeCylinder() {
   var cylinder = new Cylinder();
-  cylVert = cylinder.getVertices();
+  cylVerts = cylinder.getVertices();
   cylNorms = cylinder.getNormalVectors();
 }
 
