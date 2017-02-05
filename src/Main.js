@@ -159,12 +159,14 @@ function main() {
   }
 
   // ... for Phong material/reflectance:
-  var u_Ke = gl.getUniformLocation(gl.program, 'u_Ke');
-  var u_Ka = gl.getUniformLocation(gl.program, 'u_Ka');
-  var u_Kd = gl.getUniformLocation(gl.program, 'u_Kd');
-  var u_Ks = gl.getUniformLocation(gl.program, 'u_Ks');
+  var phongReflactance = {
+    Ke: gl.getUniformLocation(gl.program, 'u_Ke'),
+    Ka: gl.getUniformLocation(gl.program, 'u_Ka'),
+    Kd: gl.getUniformLocation(gl.program, 'u_Kd'),
+    Ks: gl.getUniformLocation(gl.program, 'u_Ks')
+  };
 
-  if(!u_Ke || !u_Ka || !u_Kd || !u_Ks) {
+  if (Object.keys(phongReflactance).some(e => !phongReflactance[e])) {
     console.log('Failed to get the Phong Reflectance storage locations');
     return;
   }
@@ -214,7 +216,7 @@ function main() {
     draw(gl, currentAngle, mvpMatrix, u_MvpMatrix,
                            modelMatrix, u_ModelMatrix,
                            normalMatrix, u_NormalMatrix,
-                           u_Ke, u_Ka, u_Kd, u_Ks);
+                           phongReflactance);
 
     requestAnimationFrame(tick, canvas);
   };
@@ -226,197 +228,172 @@ function main() {
 // shapes.
 function initVertexBuffer(gl) {
 
-  makeSphere();
-  makeHeliBody();
-  makeBrick();
-  makeCylinder();
-  makeTorus();
-  makeGroundGrid();
-
-  var vSiz = (sphVerts.length + hlcVerts.length + brkVerts.length + cylVerts.length +
-              torVerts.length + gndVerts.length);
-
-  console.log('Number of vertices is', vSiz / floatsPerVertex, ', point per vertex is', floatsPerVertex);
-
-  var verticesArrayBuffer = new ArrayBufferFloat32Array(vSiz);
-  verticesArrayBuffer.appendObject(SPHERE, sphVerts);
-  verticesArrayBuffer.appendObject(HELICOPTERBODY, hlcVerts);
-  verticesArrayBuffer.appendObject(BRICK, brkVerts);
-  verticesArrayBuffer.appendObject(CYLINDER ,cylVerts);
-  verticesArrayBuffer.appendObject(TORUS, torVerts);
-  verticesArrayBuffer.appendObject(GROUNDGRID, gndVerts);
-  sphStart = verticesArrayBuffer.getObjectStartPosition(SPHERE);
-  hlcStart = verticesArrayBuffer.getObjectStartPosition(HELICOPTERBODY);
-  brkStart = verticesArrayBuffer.getObjectStartPosition(BRICK);
-  cylStart = verticesArrayBuffer.getObjectStartPosition(CYLINDER);
-  torStart = verticesArrayBuffer.getObjectStartPosition(TORUS);
-  gndStart = verticesArrayBuffer.getObjectStartPosition(GROUNDGRID);
-
-  var nSiz = vSiz;
-  var normalVectorsArrayBuffer = new ArrayBufferFloat32Array(nSiz);
-  normalVectorsArrayBuffer.appendObject(SPHERE, sphNorms);
-  normalVectorsArrayBuffer.appendObject(HELICOPTERBODY, hlcNorms);
-  normalVectorsArrayBuffer.appendObject(BRICK, brkNorms);
-  normalVectorsArrayBuffer.appendObject(CYLINDER ,cylNorms);
-  normalVectorsArrayBuffer.appendObject(TORUS, torNorms);
-  normalVectorsArrayBuffer.appendObject(GROUNDGRID, gndNorms);
-
-  var iSiz = (sphIndex.length + hlcIndex.length + brkIndex.length);
-  console.log('iSiz is', iSiz);
-
-  var verticesIndiceArrayBuffer = new ArrayBufferUint8Array(iSiz);
-  var hlcIndexIncr = hlcStart/floatsPerVertex;
-  var brkIndexIncr = brkStart/floatsPerVertex;
-  verticesIndiceArrayBuffer.appendObject(SPHERE, sphIndex);
-  verticesIndiceArrayBuffer.appendObject(HELICOPTERBODY, hlcIndex.map(function(idx){
-    return idx+hlcIndexIncr;
-  }));
-  verticesIndiceArrayBuffer.appendObject(BRICK, brkIndex.map(function(idx){
-    return idx+brkIndexIncr;
-  }));
-  sphIStart = verticesIndiceArrayBuffer.getObjectStartPosition(SPHERE);
-  hlcIStart = verticesIndiceArrayBuffer.getObjectStartPosition(HELICOPTERBODY);
-  brkIStart = verticesIndiceArrayBuffer.getObjectStartPosition(BRICK); 
-
-  // We create two separate buffers so that you can modify normals if you wish.
-  if (!initArrayBuffer(gl, 'a_Position', verticesArrayBuffer.getArray(), gl.FLOAT, 3)) return -1;
-  if (!initArrayBuffer(gl, 'a_Normal', normalVectorsArrayBuffer.getArray(), gl.FLOAT, 3))  return -1;
-
-  // Unbind the buffer object
-  gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-  // Write the indices to the buffer object
-  var indexBuffer = gl.createBuffer();
-  if (!indexBuffer) {
-    console.log('Failed to create the buffer object');
-    return -1;
-  }
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, verticesIndiceArrayBuffer.getArray(), gl.STATIC_DRAW);
-
-  return verticesIndiceArrayBuffer.getArray().length;
-}
-
-function initArrayBuffer(gl, attribute, data, type, num) {
-  // Create a buffer object
-  var buffer = gl.createBuffer();
-  if (!buffer) {
-    console.log('Failed to create the buffer object');
-    return false;
-  }
-  // Write date into the buffer object
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-  // Assign the buffer object to the attribute variable
-  var a_attribute = gl.getAttribLocation(gl.program, attribute);
-  if (a_attribute < 0) {
-    console.log('Failed to get the storage location of ' + attribute);
-    return false;
-  }
-  gl.vertexAttribPointer(a_attribute, num, type, false, 0, 0);
-  // Enable the assignment of the buffer object to the attribute variable
-  gl.enableVertexAttribArray(a_attribute);
-
-  return true;
-}
-
-//==============================================================================
-function makeHeliBody() {
     var helicopterBody = new HelicopterBody();
     hlcVerts = helicopterBody.getVertices();
     hlcNorms = helicopterBody.getNormalVectors();
     hlcIndex = helicopterBody.getVerticesIndices();
-}
 
-//==============================================================================
-function makeBrick() {
     var brick = new Brick();
     brkVerts = brick.getVertices();
     brkNorms = brick.getNormalVectors();
     brkIndex = brick.getVerticesIndices();
+
+    var cylinder = new Cylinder();
+    cylVerts = cylinder.getVertices();
+    cylNorms = cylinder.getNormalVectors();
+
+    var sphere = new Sphere();
+    sphVerts = sphere.getVertices();
+    sphNorms = sphere.getNormalVectors();
+    sphIndex = sphere.getVerticesIndices();
+
+    var torus = new Torus();
+    torVerts = torus.getVertices();
+    torNorms = torus.getNormalVectors();
+
+    var groundGrid = new GroundGrid();
+    gndVerts = groundGrid.getVertices();
+    gndNorms = groundGrid.getNormalVectors();
+
+    var vSiz = (sphVerts.length + hlcVerts.length + brkVerts.length + cylVerts.length +
+                torVerts.length + gndVerts.length);
+
+    console.log('Number of vertices is', vSiz / floatsPerVertex, ', point per vertex is', floatsPerVertex);
+
+    var verticesArrayBuffer = new ArrayBufferFloat32Array(vSiz);
+    verticesArrayBuffer.appendObject(SPHERE, sphVerts);
+    verticesArrayBuffer.appendObject(HELICOPTERBODY, hlcVerts);
+    verticesArrayBuffer.appendObject(BRICK, brkVerts);
+    verticesArrayBuffer.appendObject(CYLINDER ,cylVerts);
+    verticesArrayBuffer.appendObject(TORUS, torVerts);
+    verticesArrayBuffer.appendObject(GROUNDGRID, gndVerts);
+    sphStart = verticesArrayBuffer.getObjectStartPosition(SPHERE);
+    hlcStart = verticesArrayBuffer.getObjectStartPosition(HELICOPTERBODY);
+    brkStart = verticesArrayBuffer.getObjectStartPosition(BRICK);
+    cylStart = verticesArrayBuffer.getObjectStartPosition(CYLINDER);
+    torStart = verticesArrayBuffer.getObjectStartPosition(TORUS);
+    gndStart = verticesArrayBuffer.getObjectStartPosition(GROUNDGRID);
+
+    var nSiz = vSiz;
+    var normalVectorsArrayBuffer = new ArrayBufferFloat32Array(nSiz);
+    normalVectorsArrayBuffer.appendObject(SPHERE, sphNorms);
+    normalVectorsArrayBuffer.appendObject(HELICOPTERBODY, hlcNorms);
+    normalVectorsArrayBuffer.appendObject(BRICK, brkNorms);
+    normalVectorsArrayBuffer.appendObject(CYLINDER ,cylNorms);
+    normalVectorsArrayBuffer.appendObject(TORUS, torNorms);
+    normalVectorsArrayBuffer.appendObject(GROUNDGRID, gndNorms);
+
+    var iSiz = (sphIndex.length + hlcIndex.length + brkIndex.length);
+    console.log('iSiz is', iSiz);
+
+    var verticesIndiceArrayBuffer = new ArrayBufferUint8Array(iSiz);
+    var hlcIndexIncr = hlcStart/floatsPerVertex;
+    var brkIndexIncr = brkStart/floatsPerVertex;
+    verticesIndiceArrayBuffer.appendObject(SPHERE, sphIndex);
+    verticesIndiceArrayBuffer.appendObject(HELICOPTERBODY, hlcIndex.map(function(idx){
+      return idx+hlcIndexIncr;
+    }));
+    verticesIndiceArrayBuffer.appendObject(BRICK, brkIndex.map(function(idx){
+      return idx+brkIndexIncr;
+    }));
+    sphIStart = verticesIndiceArrayBuffer.getObjectStartPosition(SPHERE);
+    hlcIStart = verticesIndiceArrayBuffer.getObjectStartPosition(HELICOPTERBODY);
+    brkIStart = verticesIndiceArrayBuffer.getObjectStartPosition(BRICK); 
+
+    // We create two separate buffers so that you can modify normals if you wish.
+    if (!initArrayBuffer(gl, 'a_Position', verticesArrayBuffer.getArray(), gl.FLOAT, 3)) return -1;
+    if (!initArrayBuffer(gl, 'a_Normal', normalVectorsArrayBuffer.getArray(), gl.FLOAT, 3))  return -1;
+
+    // Unbind the buffer object
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+    // Write the indices to the buffer object
+    var indexBuffer = gl.createBuffer();
+    if (!indexBuffer) {
+      console.log('Failed to create the buffer object');
+      return -1;
+    }
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, verticesIndiceArrayBuffer.getArray(), gl.STATIC_DRAW);
+
+    return verticesIndiceArrayBuffer.getArray().length;
+}
+
+function initArrayBuffer(gl, attribute, data, type, num) {
+    // Create a buffer object
+    var buffer = gl.createBuffer();
+    if (!buffer) {
+      console.log('Failed to create the buffer object');
+      return false;
+    }
+    // Write date into the buffer object
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+    // Assign the buffer object to the attribute variable
+    var a_attribute = gl.getAttribLocation(gl.program, attribute);
+    if (a_attribute < 0) {
+      console.log('Failed to get the storage location of ' + attribute);
+      return false;
+    }
+    gl.vertexAttribPointer(a_attribute, num, type, false, 0, 0);
+    // Enable the assignment of the buffer object to the attribute variable
+    gl.enableVertexAttribArray(a_attribute);
+
+    return true;
 }
 
 //==============================================================================
-function makeCylinder() {
-  var cylinder = new Cylinder();
-  cylVerts = cylinder.getVertices();
-  cylNorms = cylinder.getNormalVectors();
+function draw(gl, currentAngle, mvpMatrix, u_MvpMatrix, modelMatrix, u_ModelMatrix, normalMatrix, u_NormalMatrix, phongReflactance) {
+
+    modelMatrix = new Matrix4();
+
+    //--------Draw Helicopter
+    // Set the Phong materials' reflectance:
+    setDrawMaterial(gl, phongReflactance, new Material(MATL_EMERALD));
+
+    pushMatrix(mvpMatrix);
+    drawHelicopter(gl, currentAngle, mvpMatrix, u_MvpMatrix, modelMatrix, u_ModelMatrix, normalMatrix, u_NormalMatrix);
+    mvpMatrix = popMatrix();
+
+    //--------Draw Sphere Cone
+    // Set the Phong materials' reflectance:
+    setDrawMaterial(gl, phongReflactance, new Material(MATL_COPPER_SHINY));
+
+    pushMatrix(mvpMatrix);
+    drawSphereCone(gl, currentAngle, mvpMatrix, u_MvpMatrix, modelMatrix, u_ModelMatrix, normalMatrix, u_NormalMatrix);
+    mvpMatrix = popMatrix();
+
+    //--------Draw SnowMan
+    // Set the Phong materials' reflectance:
+    setDrawMaterial(gl, phongReflactance, new Material(MATL_PEARL));
+
+    pushMatrix(mvpMatrix);
+    drawSnowMan(gl, currentAngle, mvpMatrix, u_MvpMatrix, modelMatrix, u_ModelMatrix, normalMatrix, u_NormalMatrix);
+    mvpMatrix = popMatrix();
+
+    //---------Draw Ground Plane
+    // Set the Phong materials' reflectance:
+    setDrawMaterial(gl, phongReflactance, new Material(MATL_GRN_PLASTIC));
+
+    modelMatrix.setScale(0.4, 0.4,0.4);
+    drawSetting(gl, mvpMatrix, u_MvpMatrix, modelMatrix, u_ModelMatrix, normalMatrix, u_NormalMatrix);
+    gl.drawArrays(gl.LINES, gndStart/floatsPerVertex, gndVerts.length/floatsPerVertex);
 }
 
-//==============================================================================
-function makeSphere () {
-  var sphere = new Sphere();
-  sphVerts = sphere.getVertices();
-  sphNorms = sphere.getNormalVectors();
-  sphIndex = sphere.getVerticesIndices();
+function setDrawMaterial(gl, phongReflactance, material) {
+    gl.uniform3f(phongReflactance.Ke, material.emissive[0], material.emissive[1], material.emissive[2]);
+    gl.uniform3f(phongReflactance.Ka, material.ambient[0],  material.ambient[1],  material.ambient[2]);
+    gl.uniform3f(phongReflactance.Kd, material.diffuse[0],  material.diffuse[1],  material.diffuse[2]);
+    gl.uniform3f(phongReflactance.Ks, material.specular[0], material.specular[1], material.specular[2]);
 }
 
-//==============================================================================
-function makeTorus() {
-  var torus = new Torus();
-  torVerts = torus.getVertices();
-  torNorms = torus.getNormalVectors();
-}
-
-//==============================================================================
-function makeGroundGrid() {
-  var groundGrid = new GroundGrid();
-  gndVerts = groundGrid.getVertices();
-  gndNorms = groundGrid.getNormalVectors();
-}
-
-//==============================================================================
-function draw(gl, currentAngle, mvpMatrix, u_MvpMatrix, modelMatrix, u_ModelMatrix, normalMatrix, u_NormalMatrix, u_Ke, u_Ka, u_Kd, u_Ks) {
-
-  modelMatrix = new Matrix4();
-
-  //--------Draw Helicopter
-  // Set the Phong materials' reflectance:
-  var material = new Material(MATL_EMERALD);
-  gl.uniform3f(u_Ke, material.emissive[0], material.emissive[1], material.emissive[2]);
-  gl.uniform3f(u_Ka, material.ambient[0],  material.ambient[1],  material.ambient[2]);
-  gl.uniform3f(u_Kd, material.diffuse[0],  material.diffuse[1],  material.diffuse[2]);
-  gl.uniform3f(u_Ks, material.specular[0], material.specular[1], material.specular[2]);
-
-  pushMatrix(mvpMatrix);
-  drawHelicopter(gl, currentAngle, mvpMatrix, u_MvpMatrix, modelMatrix, u_ModelMatrix, normalMatrix, u_NormalMatrix);
-  mvpMatrix = popMatrix();
-
-  //--------Draw Sphere Cone
-  // Set the Phong materials' reflectance:
-  material = new Material(MATL_COPPER_SHINY);
-  gl.uniform3f(u_Ke, material.emissive[0], material.emissive[1], material.emissive[2]);
-  gl.uniform3f(u_Ka, material.ambient[0],  material.ambient[1],  material.ambient[2]);
-  gl.uniform3f(u_Kd, material.diffuse[0],  material.diffuse[1],  material.diffuse[2]);
-  gl.uniform3f(u_Ks, material.specular[0], material.specular[1], material.specular[2]);
-
-  pushMatrix(mvpMatrix);
-  drawSphereCone(gl, currentAngle, mvpMatrix, u_MvpMatrix, modelMatrix, u_ModelMatrix, normalMatrix, u_NormalMatrix);
-  mvpMatrix = popMatrix();
-
-  //--------Draw SnowMan
-  // Set the Phong materials' reflectance:
-  material = new Material(MATL_PEARL);
-  gl.uniform3f(u_Ke, material.emissive[0], material.emissive[1], material.emissive[2]);
-  gl.uniform3f(u_Ka, material.ambient[0],  material.ambient[1],  material.ambient[2]);
-  gl.uniform3f(u_Kd, material.diffuse[0],  material.diffuse[1],  material.diffuse[2]);
-  gl.uniform3f(u_Ks, material.specular[0], material.specular[1], material.specular[2]);
-
-  pushMatrix(mvpMatrix);
-  drawSnowMan(gl, currentAngle, mvpMatrix, u_MvpMatrix, modelMatrix, u_ModelMatrix, normalMatrix, u_NormalMatrix);
-  mvpMatrix = popMatrix();
-
-  //---------Draw Ground Plane
-  // Set the Phong materials' reflectance:
-  material = new Material(MATL_GRN_PLASTIC);
-  gl.uniform3f(u_Ke, material.emissive[0], material.emissive[1], material.emissive[2]);
-  gl.uniform3f(u_Ka, material.ambient[0],  material.ambient[1],  material.ambient[2]);
-  gl.uniform3f(u_Kd, material.diffuse[0],  material.diffuse[1],  material.diffuse[2]);
-  gl.uniform3f(u_Ks, material.specular[0], material.specular[1], material.specular[2]);
-
-  modelMatrix.setScale(0.4, 0.4,0.4);
-  drawSetting(gl, mvpMatrix, u_MvpMatrix, modelMatrix, u_ModelMatrix, normalMatrix, u_NormalMatrix);
-  gl.drawArrays(gl.LINES, gndStart/floatsPerVertex, gndVerts.length/floatsPerVertex);
+function drawSetting(gl, mvpMatrix, u_MvpMatrix, modelMatrix, u_ModelMatrix, normalMatrix, u_NormalMatrix) {
+    mvpMatrix.multiply(modelMatrix);
+    normalMatrix.setInverseOf(modelMatrix);
+    normalMatrix.transpose();
+    gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+    gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements);
+    gl.uniformMatrix4fv(u_NormalMatrix, false, normalMatrix.elements);
 }
 
 //==============================================================================
@@ -575,16 +552,6 @@ function drawSnowMan(gl, currentAngle, mvpMatrix, u_MvpMatrix, modelMatrix, u_Mo
   modelMatrix.scale(0.8, 0.8, 0.6 + 0.2 * Math.cos(Math.PI * currentAngle/180));
   drawSetting(gl, mvpMatrix, u_MvpMatrix, modelMatrix, u_ModelMatrix, normalMatrix, u_NormalMatrix);
   gl.drawElements(gl.TRIANGLES, sphIndex.length, gl.UNSIGNED_BYTE, sphIStart);
-
-}
-
-function drawSetting(gl, mvpMatrix, u_MvpMatrix, modelMatrix, u_ModelMatrix, normalMatrix, u_NormalMatrix) {
-  mvpMatrix.multiply(modelMatrix);
-  normalMatrix.setInverseOf(modelMatrix);
-  normalMatrix.transpose();
-  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-  gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements);
-  gl.uniformMatrix4fv(u_NormalMatrix, false, normalMatrix.elements);
 }
 
 // Last time that this function was called:  (used for animation timing)
