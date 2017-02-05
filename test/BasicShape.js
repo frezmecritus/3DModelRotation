@@ -92,10 +92,68 @@ describe('BasicShape', function() {
         });
     });
 
-    describe('Sphere', function() {
-        var impl = new BasicShape.Sphere();
+    describe('Cylinder', function() {
+        var impl = new BasicShape.Cylinder();
         var numberOfCapVertices = 32;
-        var numberOfVertices = (6*numberOfCapVertices + 4)*floatsPerVertex; // 2v+1 + 2v+2 + 2v+1
+        var numberOfVertices = (6*numberOfCapVertices + 4)*floatsPerVertex;
+        
+        describe('getVertices', function() {
+            it('should return a Float32Array with correct elements', function() {
+                var array = impl.getVertices();
+                assert.instanceOf(array, Float32Array); 
+                assert.equal(numberOfVertices, array.length);
+            });
+        });
+
+        describe('getNormalVectors', function() {
+            it('should return a Float32Array with correct elements', function() {
+                var array = impl.getNormalVectors();
+                assert.instanceOf(array, Float32Array); 
+                assert.equal(numberOfVertices, array.length);
+            });
+        });
+
+        describe('getVerticesIndices', function() {
+            it('is not a function', function() {
+                assert.isNotFunction(impl.getVerticesIndices());
+            });
+        });
+    });
+
+    describe('Torus', function() {
+        var impl = new BasicShape.Torus();
+        var numberOfBars = 23;
+        var sidesOfBars = 13;
+        var numberOfVertices = floatsPerVertex*(2*sidesOfBars*numberOfBars +2);
+        
+        describe('getVertices', function() {
+            it('should return a Float32Array with correct elements', function() {
+                var array = impl.getVertices();
+                assert.instanceOf(array, Float32Array); 
+                assert.equal(numberOfVertices, array.length);
+            });
+        });
+
+        describe('getNormalVectors', function() {
+            it('should return a Float32Array with correct elements', function() {
+                var array = impl.getNormalVectors();
+                assert.instanceOf(array, Float32Array); 
+                assert.equal(numberOfVertices, array.length);
+            });
+        });
+
+        describe('getVerticesIndices', function() {
+            it('is not a function', function() {
+                assert.isNotFunction(impl.getVerticesIndices());
+            });
+        });
+    });
+
+    describe('GroundGrid', function() {
+        var impl = new BasicShape.GroundGrid();
+        var numberOfLinesAlongYAxis = 100;
+        var numberOfLinesAlongXAxis = 100;
+        var numberOfVertices = floatsPerVertex*2*(numberOfLinesAlongYAxis+numberOfLinesAlongXAxis);
         
         describe('getVertices', function() {
             it('should return a Float32Array with correct elements', function() {
