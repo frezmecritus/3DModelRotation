@@ -22,14 +22,32 @@ var viewSet = {
   rotate: {theta: 210.0, phi: 0.0, tilt: 0.0}
 };
 
-var g_lamp1Attr = {
+var LAMP0 = {
+  pos: {x: g_EyeX, y:g_EyeY, z: g_EyeZ, w: 1.0},
+  amb: {r: 0.4, g: 0.4, b: 0.4},
+  dif: {r: 1.0, g: 1.0, b: 1.0},
+  spc: {r: 1.0, g: 1.0, b: 1.0}
+};
+
+var LAMP1 = {
   pos: {x: 6.0, y:-2.0, z: 3.0, w: 1.0},
   amb: {r: 0.1, g: 0.0, b: 0.2},
   dif: {r: 0.0, g: 0.1, b: 0.2},
   spc: {r: 0.1, g: 0.0, b: 0.2}
 };
 
+// Last time that this function was called:  (used for animation timing)
+var g_last = Date.now();
 
+function animate(angle) {
+  // Calculate the elapsed time
+  var now = Date.now();
+  var elapsed = now - g_last;
+  g_last = now;
+
+  var newAngle = angle + (ANGLE_STEP * elapsed) / 1000.0;
+  return newAngle %= 360;
+}
 
 // web initialization
 $( function() {
@@ -43,7 +61,7 @@ $( function() {
       if(!isNaN(value)) {
         arr = name.split("_");
         //console.log( arr[0] + ' ' + arr[1] + ' ' + arr[2]);
-        g_lamp1Attr[ arr[1] ][ arr[2] ] = value;
+        LAMP1[ arr[1] ][ arr[2] ] = value;
       }
       lamb1update();
     })
@@ -52,18 +70,18 @@ $( function() {
 });
 
 function lamb1update() {
-  $('#lamp1_pos_x').val(g_lamp1Attr.pos.x);
-  $('#lamp1_pos_y').val(g_lamp1Attr.pos.y);
-  $('#lamp1_pos_z').val(g_lamp1Attr.pos.z);
-  $('#lamp1_amb_r').val(g_lamp1Attr.amb.r);
-  $('#lamp1_amb_g').val(g_lamp1Attr.amb.g);
-  $('#lamp1_amb_b').val(g_lamp1Attr.amb.b);
-  $('#lamp1_dif_r').val(g_lamp1Attr.dif.r);
-  $('#lamp1_dif_g').val(g_lamp1Attr.dif.g);
-  $('#lamp1_dif_b').val(g_lamp1Attr.dif.b);
-  $('#lamp1_spc_r').val(g_lamp1Attr.spc.r);
-  $('#lamp1_spc_g').val(g_lamp1Attr.spc.g);
-  $('#lamp1_spc_b').val(g_lamp1Attr.spc.b);
+  $('#lamp1_pos_x').val(LAMP1.pos.x);
+  $('#lamp1_pos_y').val(LAMP1.pos.y);
+  $('#lamp1_pos_z').val(LAMP1.pos.z);
+  $('#lamp1_amb_r').val(LAMP1.amb.r);
+  $('#lamp1_amb_g').val(LAMP1.amb.g);
+  $('#lamp1_amb_b').val(LAMP1.amb.b);
+  $('#lamp1_dif_r').val(LAMP1.dif.r);
+  $('#lamp1_dif_g').val(LAMP1.dif.g);
+  $('#lamp1_dif_b').val(LAMP1.dif.b);
+  $('#lamp1_spc_r').val(LAMP1.spc.r);
+  $('#lamp1_spc_g').val(LAMP1.spc.g);
+  $('#lamp1_spc_b').val(LAMP1.spc.b);
 }
 
 //===============================================================================
