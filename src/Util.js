@@ -13,7 +13,6 @@ var g_EyeX = 6, g_EyeY = -2, g_EyeZ = 3;
 var g_centerX = 0, g_centerY = 0, g_centerZ = 0;
 var g_upX = 0, g_upY = 0, g_upZ = 1;
 var g_near = 1, g_far = 50;
-var vpAspect = 3.0;
 
 var viewSet = {
   eye:    {x: 6.8, y: 4.0, z: 0.5},
