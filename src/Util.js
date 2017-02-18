@@ -69,18 +69,16 @@ $( function() {
 });
 
 function lamb1update() {
-  $('#lamp1_pos_x').val(LAMP1.pos.x);
-  $('#lamp1_pos_y').val(LAMP1.pos.y);
-  $('#lamp1_pos_z').val(LAMP1.pos.z);
-  $('#lamp1_amb_r').val(LAMP1.amb.r);
-  $('#lamp1_amb_g').val(LAMP1.amb.g);
-  $('#lamp1_amb_b').val(LAMP1.amb.b);
-  $('#lamp1_dif_r').val(LAMP1.dif.r);
-  $('#lamp1_dif_g').val(LAMP1.dif.g);
-  $('#lamp1_dif_b').val(LAMP1.dif.b);
-  $('#lamp1_spc_r').val(LAMP1.spc.r);
-  $('#lamp1_spc_g').val(LAMP1.spc.g);
-  $('#lamp1_spc_b').val(LAMP1.spc.b);
+  Object.keys(LAMP1).map(k1 => {
+      Object.keys(LAMP1[k1]).map(k2 =>{
+        if (k2=='w') {
+          return;
+        }
+        var value = LAMP1[k1][k2];
+        var DOMId = '#lamp1_'+k1+'_'+k2;
+        $(DOMId).val(value);
+      });
+  });
 }
 
 //===============================================================================
