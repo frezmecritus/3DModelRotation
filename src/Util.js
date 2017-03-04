@@ -1,3 +1,9 @@
+var floatsPerVertex = 3;
+
+var qNew = new Quaternion(0,0,0,1); // most-recent mouse drag's rotation
+var qTot = new Quaternion(0,0,0,1);  // 'current' orientation (made from qNew)
+var quatMatrix = new Matrix4();       // rotation matrix, made from latest qTot
+
 // String for custom ArrayBuffer's GET and SET action.
 var BRICK = 'brick';
 var SPHERE = 'sphere';
@@ -6,7 +12,6 @@ var HELICOPTERBODY = 'Helicopter_body';
 var TORUS = 'torus';
 var GROUNDGRID = 'ground_grid';
 
-// Global Variables
 var ANGLE_STEP = 45.0;
 
 var g_EyeX = 6, g_EyeY = -2, g_EyeZ = 3;
@@ -67,6 +72,22 @@ $( function() {
     .keyup();
   //alert("Press 'h' for input instruction");
 });
+
+function main() {
+    var canvas = document.getElementById('webgl');
+
+    winResize();
+    // GLstart(canvas);
+    var sceneManager = new SceneManager(canvas);
+    sceneManager.start();
+    
+    // Register the Mouse & Keyboard Event-handlers-------------------------------
+    //canvas.onmousedown = function(ev){myMouseDown( ev, gl, canvas) };
+    //canvas.onmousemove = function(ev){myMouseMove( ev, gl, canvas) };
+    //canvas.onmouseup   = function(ev){myMouseUp(   ev, gl, canvas) };
+    window.addEventListener("keypress", myKeyPress);
+}
+
 
 function lamb1update() {
   Object.keys(LAMP1).map(k1 => {

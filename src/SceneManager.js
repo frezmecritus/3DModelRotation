@@ -400,38 +400,40 @@ function SceneManager(canvas) {
     }
 
     function drawHelicopterBody() {
-        var indicesStart = indiceArrayBuffer.getObjectStartPosition(HELICOPTERBODY);
-        var indicesLength = indiceArrayBuffer.getObjectLength(HELICOPTERBODY);
-        gl.drawElements(gl.TRIANGLES, indicesLength, gl.UNSIGNED_BYTE, indicesStart);
+        glDrawTriangles(HELICOPTERBODY);
     }
 
     function drawBrick() {
-        var indicesStart = indiceArrayBuffer.getObjectStartPosition(BRICK);
-        var indicesLength = indiceArrayBuffer.getObjectLength(BRICK);
-        gl.drawElements(gl.TRIANGLES, indicesLength, gl.UNSIGNED_BYTE, indicesStart);
+        glDrawTriangles(BRICK);
     }
 
     function drawCylinder() {
-        var indicesStart = verticesArrayBuffer.getObjectStartPosition(CYLINDER) / floatsPerVertex;
-        var indicesLength = verticesArrayBuffer.getObjectLength(CYLINDER) / floatsPerVertex;
-        gl.drawArrays(gl.TRIANGLE_STRIP, indicesStart , indicesLength);
+        glDrawTriangleStrip(CYLINDER);
     }
 
     function drawSphere() {
-        var indicesStart = indiceArrayBuffer.getObjectStartPosition(SPHERE);
-        var indicesLength = indiceArrayBuffer.getObjectLength(SPHERE);
-        gl.drawElements(gl.TRIANGLES, indicesLength, gl.UNSIGNED_BYTE, indicesStart);
+        glDrawTriangles(SPHERE);
     }
 
     function drawTorus() {
-        var indicesStart = verticesArrayBuffer.getObjectStartPosition(TORUS) / floatsPerVertex;
-        var indicesLength = verticesArrayBuffer.getObjectLength(TORUS) / floatsPerVertex;
-        gl.drawArrays(gl.TRIANGLE_STRIP, indicesStart , indicesLength);
+        glDrawTriangleStrip(TORUS);
     }
 
     function drawGroundGrid() {
         var indicesStart = verticesArrayBuffer.getObjectStartPosition(GROUNDGRID) / floatsPerVertex;
         var indicesLength = verticesArrayBuffer.getObjectLength(GROUNDGRID) / floatsPerVertex;
         gl.drawArrays(gl.LINES, indicesStart , indicesLength);
+    }
+
+    function glDrawTriangles(modelName) {
+        var indicesStart = indiceArrayBuffer.getObjectStartPosition(modelName);
+        var indicesLength = indiceArrayBuffer.getObjectLength(modelName);
+        gl.drawElements(gl.TRIANGLES, indicesLength, gl.UNSIGNED_BYTE, indicesStart);
+    }
+
+    function glDrawTriangleStrip(modelName) {
+        var indicesStart = verticesArrayBuffer.getObjectStartPosition(modelName) / floatsPerVertex;
+        var indicesLength = verticesArrayBuffer.getObjectLength(modelName) / floatsPerVertex;
+        gl.drawArrays(gl.TRIANGLE_STRIP, indicesStart , indicesLength);
     }
 }

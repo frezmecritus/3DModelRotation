@@ -87,25 +87,3 @@ var FSHADER_SOURCE =
   '  vec3 speculr = (u_Lamp0Spec * e640 * e640 + u_Lamp1Spec * e641 * e641) * u_Ks;\n' +
   '  gl_FragColor = vec4(emissive + ambient + diffuse + speculr , 1.0);\n' +
   '}\n';
-
-var floatsPerVertex = 3;
-
-var qNew = new Quaternion(0,0,0,1); // most-recent mouse drag's rotation
-var qTot = new Quaternion(0,0,0,1);  // 'current' orientation (made from qNew)
-var quatMatrix = new Matrix4();       // rotation matrix, made from latest qTot
-
-//==============================================================================
-function main() {
-    var canvas = document.getElementById('webgl');
-
-    winResize();
-    // GLstart(canvas);
-    var sceneManager = new SceneManager(canvas);
-    sceneManager.start();
-    
-    // Register the Mouse & Keyboard Event-handlers-------------------------------
-    //canvas.onmousedown = function(ev){myMouseDown( ev, gl, canvas) };
-    //canvas.onmousemove = function(ev){myMouseMove( ev, gl, canvas) };
-    //canvas.onmouseup   = function(ev){myMouseUp(   ev, gl, canvas) };
-    window.addEventListener("keypress", myKeyPress);
-}
